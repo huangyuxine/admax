@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>登录</title>
+		<link rel="stylesheet" href="__STATIC__/component/pear/css/pear.css" />
+		<link rel="stylesheet" href="__STATIC__/admin/css/other/login.css" />
+	</head>
+	<body background="__STATIC__/admin/images/background2.svg" style="background-size: cover;">
+		<form class="layui-form" action="">
+			<div class="layui-form-item">
+				<img class="logo" src="__STATIC__/admin/images/logo.png" />
+				<div class="title">Admax</div>
+			</div>
+			<div class="layui-form-item">
+				<input placeholder="账 户" hover class="layui-input" name="username" />
+			</div>
+			<div class="layui-form-item">
+				<input placeholder="密 码" hover class="layui-input"  type='password' name="password"/>
+			</div>
+			<div class="layui-form-item">
+				<input placeholder="验证码"  hover class="code layui-input layui-input-inline" name="verify" />
+				<img src="{:url('login/captcha')}" class="codeImage" onclick="this.src='{:url('login/captcha')}?seed='+Math.random()"/>
+			</div>
+			<div class="layui-form-item">
+				<input type="checkbox" name="" title="记住密码" lay-skin="primary" checked>
+			</div>
+			<div class="layui-form-item">
+				<button class="pear-btn pear-btn-success login" lay-submit lay-filter="login">
+					登 入
+				</button>
+			</div>
+		</form>
+		<!-- 资 源 引 入 -->
+		<script src="__STATIC__/component/layui/layui.js"></script>
+		<script src="__STATIC__/component/pear/pear.js"></script>
+		<script>
+			layui.use(['form', 'element', 'jquery', 'button', 'popup'], function() {
+				var form = layui.form;
+				var element = layui.element;
+				var button = layui.button;
+				var popup = layui.popup;
+				var $ = layui.jquery;
+			    form.on('submit(login)', function(data){
+			        $.ajax({
+			            url:'/admax.php/login/login',
+			            data:JSON.stringify(data.field),
+			            dataType:'json',
+			            contentType:'application/json',
+			            type:'post',
+			            success:function(result){
+			                if(result.code){
+			                    layer.msg(result.msg,{icon:1,time:1000},function(){
+			                    	location.href = result.url;
+			                    });
+			                }else{
+			                    layer.msg(result.msg,{icon:2,time:1000});
+			                }
+			            }
+			        })
+			        return false;
+			    });
+			})
+		</script>
+	</body>
+</html>

@@ -1,0 +1,134 @@
+{extend name="base" /}
+{block name="body"}
+<form class="layui-form" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">分类</label>
+                    <div class="layui-input-block">
+                      <select name="cid" class='layui-input' lay-verify="required" lay-reqtext="请选择分类">
+                        <option value="0">请选择</option>
+                        {volist name='list' id='vo'}
+                        <option value="{$vo.id}"  {if $data.cid==$vo.id}selected="selected"{/if}>{$vo.title|raw}</option>
+                        {/volist}
+                      </select>
+                    </div>
+                  </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">标题</label>
+                    <div class="layui-input-block">
+                        <input type="text"  name="title" placeholder="请输入标题" value="{$data.title}" class="layui-input" autocomplete="off" lay-verify="required" lay-reqtext="请输入标题">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">介绍</label>
+                    <div class="layui-input-block">
+                        <textarea class="layui-textarea" name='introduction' placeholder="请输入介绍" >{$data.introduction}</textarea>
+                    </div>
+                 </div>
+                 <div class="layui-form-item">
+                    <label class="layui-form-label required">内容</label>
+                    <div class="layui-input-block">
+                        <textarea class="layui-textarea" name='content' id='content'>{$data.content}</textarea>
+                    </div>
+                 </div>
+                 <div class="layui-form-item">
+                    <label class="layui-form-label">展示图</label>
+                    <div class="layui-upload-drag" id="upload">
+                      <i class="layui-icon"></i>
+                      <p>点击上传，或将文件拖拽到此处</p>
+                      <div {if condition="!$data.thumb"} class="layui-hide" {/if} id="uploadView">
+                        <hr>
+                        <input type="hidden" name="thumb" value="" id="thumb" />
+                        <img src="{$data.thumb|default=''}" alt="上传成功后渲染" style="max-width: 196px">
+                      </div>
+                    </div>
+
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">是否推荐</label>
+                    <div class="layui-input-block">
+                      <input type="radio" name="is_recommend" value="0" title="不推荐" checked {if condition="$data.is_recommend eq 0"} checked {/if}/>
+                      <input type="radio" name="is_recommend" value="1" title="推荐" {if condition="$data.is_recommend eq 1"} checked {/if}>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <input type="hidden" name="id" value="{$data.id}" />
+            <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="article-update">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+{/block}
+{block name='js'}
+<script>
+layui.use(['form','jquery', 'upload', 'tinymce'],function(){
+    var content;
+    var textareaData;
+    let form = layui.form;
+    let $ = layui.jquery;
+    let upload = layui.upload;
+    let tinymce = layui.tinymce;
+    layui.use(['tinymce'], function() {
+        var tinymce = layui.tinymce
+        content = tinymce.render({
+            elem: "#content",
+            height: 400,
+            images_upload_url: '{:url("upload/upload")}',
+        });
+    });
+
+    form.on('submit(article-update)', function(data){
+        var data = data.field;
+        textareaData = content.getContent();
+        data.content = textareaData;
+        data = JSON.stringify(data)
+        $.ajax({
+            url:'{:url("article/update")}',
+            data: data,
+            dataType:'json',
+            contentType:'application/json',
+            type:'put',
+            success:function(result){
+                if(result.code){
+                    layer.msg(result.msg,{icon:1,time:1000},function(){
+                        parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                    });
+                }else{
+                    layer.msg(result.msg,{icon:2,time:1000});
+                }
+            }
+        })
+        return false;
+    });
+
+          //拖拽上传
+      upload.render({
+        elem: '#upload'
+        ,url: '{:url("upload/upload")}'
+        ,done: function(res){
+         
+          layer.msg(res.msg);
+          if (res.code == 1) {
+              layui.$('#uploadView').removeClass('layui-hide').find('img').attr('src', res.url);
+              $('#thumb').val(res.url)  
+          }
+
+        }
+      });
+
+
+})
+</script>
+{/block}

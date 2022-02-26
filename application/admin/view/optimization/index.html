@@ -1,0 +1,65 @@
+{extend name="base" /}
+{block name="body"}
+		<div class="layui-card">
+			<div class="layui-card-body">
+				<table id="opt-table" lay-filter="opt-table"></table>
+			</div>
+		</div>
+		
+		<script type="text/html" id="opt-toolbar">
+			<button class="pear-btn pear-btn-primary pear-btn-md maintain">
+				<i class="layui-icon"></i>
+				一键优化
+			</button>
+		</script>
+{/block}
+{block name='js'}
+<script>
+    layui.use(['table','form','jquery'],function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        let MODULE_PATH = "/admax.php/optimization/";
+
+        let cols = [
+            [
+                {type:'checkbox'},
+                {title: '表名', field: 'Name', align:'center', width:100},
+                {title: '引擎', field: 'Engine', align:'center'},
+                {title: '条数', field: 'Rows', align:'center'},
+                {title: '创建时间', field: 'Create_time', align:'center'},
+            ]
+        ]
+	window.render = function(){
+        table.render({
+            elem: '#opt-table',
+            url: MODULE_PATH+'index',
+            page: false ,
+            cols: cols ,
+            skin: 'line',
+            toolbar: '#opt-toolbar',
+        });
+	};
+
+	render();
+
+        $(".maintain").click(function(){
+            $.ajax({
+                url: MODULE_PATH+"maintain",
+                data: {},
+                type:'post',
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg)
+                }
+            })    
+        })
+
+
+        window.refresh = function(){
+            table.reload('opt-table');
+        }
+    })
+</script>
+{/block}

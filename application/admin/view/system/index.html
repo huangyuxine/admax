@@ -1,0 +1,96 @@
+{extend name="base" /}
+{block name="body"}
+<form class="layui-form" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-tab">
+                  <ul class="layui-tab-title">
+                    <li class="layui-this">网站配置</li>
+                    <li>短信</li>
+                    <li>OSS存储</li>
+                  </ul>
+                  <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label required">网站标题</label>
+                            <div class="layui-input-block">
+                                <input type="text"  name="site_title" value="{$data.site_title|default=''}" placeholder="请输入管理员名称" class="layui-input" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label required">关键词</label>
+                            <div class="layui-input-block">
+                                <input type="text"  name="keywords" value="{$data.keywords|default=''}" placeholder="请输入网站" class="layui-input" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label required">描述</label>
+                            <div class="layui-input-block">
+                                <textarea class="layui-textarea" name='description' placeholder="请输入描述" >{$data.description|default=''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-tab-item">
+                         <div class="layui-form-item">
+                            <label class="layui-form-label">短信验证</label>
+                            <div class="layui-input-block">
+                              <input type="radio" name="is_sms" value="0" title="关闭" {if condition="$data.is_sms eq 0"} checked {/if}>
+                              <input type="radio" name="is_sms" value="1" title="开启" {if condition="$data.is_sms eq 1"} checked {/if}>
+                            </div>
+                          </div>
+                    </div>
+                    <div class="layui-tab-item">
+                         <div class="layui-form-item">
+                            <label class="layui-form-label">OSS存储</label>
+                            <div class="layui-input-block">
+                              <input type="radio" name="is_oss" value="0" title="关闭" {if condition="$data.is_oss eq 0"} checked {/if}>
+                              <input type="radio" name="is_oss" value="1" title="开启" {if condition="$data.is_oss eq 1"} checked {/if}>
+                            </div>
+                          </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="system-update">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+{/block}
+{block name='js'}
+<script>
+layui.use(['form','jquery','element'],function(){
+    let form = layui.form;
+    let element = layui.element;
+    let $ = layui.jquery;
+    form.on('submit(system-update)', function(data){
+        $.ajax({
+            url:'{:url("system/update")}',
+            data:JSON.stringify(data.field),
+            dataType:'json',
+            contentType:'application/json',
+            type:'put',
+            success:function(result){
+                if(result.code){
+                    layer.msg(result.msg,{icon:1,time:1000});
+                }else{
+                    layer.msg(result.msg,{icon:2,time:1000});
+                }
+            }
+        })
+        return false;
+    });
+})
+</script>
+{/block}

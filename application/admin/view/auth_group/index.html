@@ -1,0 +1,161 @@
+{extend name="base" /}
+{block name="body"}
+		<div class="layui-card">
+			<div class="layui-card-body">
+				<table id="group-table" lay-filter="group-table"></table>
+			</div>
+		</div>
+		
+		<script type="text/html" id="group-toolbar">
+			<button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+				<i class="layui-icon layui-icon-add-1"></i>
+				新增
+			</button>
+			<button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">
+				<i class="layui-icon layui-icon-delete"></i>
+				删除
+			</button>
+		</script>
+		
+		<script type="text/html" id="group-bar">
+			<button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
+			<button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
+		</script>
+		
+<script type="text/html" id="group-enable">
+    <input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="启用|禁用" lay-filter="group-enable"  {{ d.status == 1 ? 'checked' : '' }}>
+</script>
+{/block}
+{block name='js'}
+<script>
+    layui.use(['table','form','jquery'],function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        let MODULE_PATH = "/admax.php/auth_group/";
+
+        let cols = [
+            [
+                {type:'checkbox'},
+                {title: '权限组', field: 'title', align:'center', width:100},
+                {title: '状态', field: 'status', align:'center', templet:'#group-enable'},
+                {title: '创建时间', field: 'create_time', align:'center'},
+                {title: '操作', toolbar: '#group-bar', align:'center', width:195}
+            ]
+        ]
+	window.render = function(){
+        table.render({
+            elem: '#group-table',
+            url: MODULE_PATH+'index',
+            page: true ,
+            cols: cols ,
+            skin: 'line',
+            toolbar: '#group-toolbar',
+        });
+	};
+
+	render();
+
+        table.on('tool(group-table)', function(obj){
+            if(obj.event === 'remove'){
+                window.remove(obj);
+            } else if(obj.event === 'edit'){
+                window.edit(obj);
+            } else if(obj.event === 'power'){
+                window.power(obj);
+            }
+        });
+
+        table.on('toolbar(group-table)', function(obj){
+            if(obj.event === 'add'){
+                window.add();
+            } else if(obj.event === 'refresh'){
+                window.refresh();
+            } else if(obj.event === 'batchRemove'){
+                window.batchRemove(obj);
+            }
+        });
+
+
+          form.on('switch(group-enable)', function(data){
+           let id = data.value;
+           if(this.checked){
+                layer.msg('已启用',{icon:1,time:1000});
+                data = {'id':id, 'status':1};
+                enable(data);
+           }else{
+                layer.msg('已禁用',{icon:2,time:1000});
+                data = {'id':id, 'status':0};
+                enable(data);
+           }
+          });
+        window.add = function(){
+            layer.open({
+                type: 2,
+                title: '新增',
+                shade: 0.1,
+                area: ['100%', '100%'],
+                content: MODULE_PATH + 'create.html',
+                end: function(){
+            		render();
+        		}
+            });
+        }
+
+
+        window.edit = function(obj){
+    		let id = obj.data.id;
+            layer.open({
+                type: 2,
+                title: '修改',
+                shade: 0.1,
+                area: ['100%', '100%'],
+                content: MODULE_PATH + 'edit/id/'+id,
+                end: function(){
+            		render();
+        		}
+            });
+        }
+        function enable(data)
+        {
+            $.ajax({
+                url: MODULE_PATH+"status",
+                data: data,
+                type:'put',
+                dataType:'json',
+                success:function(result){
+                }
+            })
+        }
+
+        window.remove = function(obj){
+            layer.confirm('确定要删除该权限组', {icon: 3, title:'提示'}, function(index){
+                layer.close(index);
+                let data = {"id":obj.data.id};
+                let loading = layer.load();
+                $.ajax({
+                    url: MODULE_PATH+'delete',
+                    dataType:'json',
+                    type:'delete',
+                    data:data,
+                    success:function(result){
+                        layer.close(loading);
+                        if(result.code){
+                            layer.msg(result.msg,{icon:1,time:1000},function(){
+                                obj.del();
+                            });
+                        }else{
+                            layer.msg(result.msg,{icon:2,time:1000});
+                        }
+                    }
+                })
+            });
+        }
+
+        window.refresh = function(){
+            table.reload('group-table');
+        }
+    })
+</script>
+{/block}
